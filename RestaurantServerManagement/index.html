@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Table & Order Management</title>
+<style>
+/* ===== Restaurant theme: warm tomato red, saffron gold, herb green, cream ===== */
+:root{
+  --brand:#b5301f;        /* tomato / chilli red */
+  --brand-dark:#8f2316;
+  --brand-deep:#5e130b;
+  --gold:#f2a516;         /* saffron */
+  --gold-soft:#fff3d6;
+  --green:#2f8f4e;        /* fresh herb green */
+  --green-dark:#236f3b;
+  --cream:#fff8ee;
+  --ink:#3a2418;          /* espresso brown text */
+  --muted-ink:#8a6f5e;
+  --line:#efd9bd;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 12% 8%,#ffe7c2 0,transparent 38%),
+    radial-gradient(circle at 92% 30%,#ffd9cf 0,transparent 36%),
+    radial-gradient(circle at 40% 100%,#e4f3e0 0,transparent 40%),
+    var(--cream);
+  background-attachment:fixed;
+  min-height:100vh;
+}
+
+/* ---------- Header ---------- */
+header{
+  background:linear-gradient(120deg,var(--brand-deep) 0%,var(--brand) 55%,#d9531e 100%);
+  color:#fff;
+  padding:30px 5%;
+  border-bottom:5px solid var(--gold);
+  box-shadow:0 6px 20px #5e130b40;
+}
+header h1{margin:0 0 7px;font-size:32px;letter-spacing:.5px;text-shadow:0 2px 6px #00000040}
+header p{margin:0;color:#ffe9c4;font-size:16px}
+
+/* ---------- Layout & cards ---------- */
+main{max-width:1100px;margin:28px auto;padding:0 18px;display:grid;grid-template-columns:1.1fr .9fr;gap:22px}
+.card{
+  background:#fffdf9;
+  border-radius:16px;
+  padding:24px;
+  border:1px solid var(--line);
+  border-top:5px solid var(--brand);
+  box-shadow:0 8px 24px #8f231622;
+  transition:box-shadow .2s ease;
+}
+.card:hover{box-shadow:0 12px 30px #8f23162e}
+main > .card:nth-of-type(2){border-top-color:var(--green)}
+main > .card.full{border-top-color:var(--gold)}
+
+h2{margin-top:0;color:var(--brand-dark);font-size:22px;padding-bottom:8px;border-bottom:2px dashed var(--line)}
+h3{color:var(--brand);margin:20px 0 10px;font-size:18px}
+
+/* ---------- Menu items ---------- */
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.menu-item{
+  border:1px solid var(--line);
+  border-left:5px solid var(--gold);
+  border-radius:12px;
+  padding:13px;
+  background:linear-gradient(180deg,#fffdf8,var(--gold-soft));
+  transition:box-shadow .18s ease,border-color .18s ease,background .18s ease;
+}
+.menu-item:hover{box-shadow:0 8px 18px #f2a51655;border-left-color:var(--brand)}
+.menu-item:has(input:checked){background:linear-gradient(180deg,#f3fbf1,#dcf2dc);border-color:var(--green);border-left-color:var(--green)}
+.menu-item label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.menu-item small{color:var(--muted-ink);text-transform:uppercase;letter-spacing:.6px;font-size:11px}
+.price{font-weight:bold;color:var(--green-dark);margin-top:7px;font-size:16px}
+input[type="checkbox"]{accent-color:var(--brand);cursor:pointer}
+
+/* ---------- Form fields ---------- */
+label.field{display:block;font-weight:bold;margin:14px 0 6px;color:var(--brand-dark)}
+input,select{
+  width:100%;padding:11px;border:2px solid var(--line);border-radius:10px;font-size:15px;
+  background:#fffefb;color:var(--ink);
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+input:hover,select:hover{border-color:#e2bd8a}
+input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px #b5301f22}
+
+/* ---------- Buttons ---------- */
+button{
+  background:linear-gradient(135deg,var(--brand),#d9531e);
+  color:#fff;border:0;border-radius:10px;padding:12px 20px;font-weight:bold;cursor:pointer;margin-top:16px;
+  font-size:15px;letter-spacing:.3px;
+  box-shadow:0 4px 12px #b5301f45;
+  transition:box-shadow .15s ease,background .2s ease,filter .15s ease;
+}
+button:hover{background:linear-gradient(135deg,var(--brand-dark),var(--brand));box-shadow:0 8px 18px #b5301f66}
+button:active{box-shadow:0 2px 5px #b5301f55;filter:brightness(.95)}
+button[type="button"]{background:linear-gradient(135deg,var(--green),#43a862);box-shadow:0 4px 12px #2f8f4e45}
+button[type="button"]:hover{background:linear-gradient(135deg,var(--green-dark),var(--green));box-shadow:0 8px 18px #2f8f4e55}
+
+/* ---------- Notices ---------- */
+.notice{margin-top:14px;padding:12px 14px;border-radius:10px;display:none;font-weight:600}
+.success{background:#dcf5e3;color:#1b5e32;border:1px solid #9fd8b2;border-left:6px solid var(--green)}
+.error{background:#fde3df;color:#8f1d12;border:1px solid #f2aca3;border-left:6px solid var(--brand)}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:14px;border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line)}
+th{background:linear-gradient(90deg,var(--brand-dark),var(--brand));color:#fff;font-weight:600;letter-spacing:.4px}
+tbody tr:nth-child(even){background:#fff6e8}
+tbody tr{transition:background .15s ease}
+tbody tr:hover{background:var(--gold-soft)}
+
+.full{grid-column:1/-1}
+.muted{color:var(--muted-ink);font-size:14px}
+
+@media(max-width:760px){main{grid-template-columns:1fr}.full{grid-column:auto}header h1{font-size:26px}}
+</style>
+</head>
+<body>
+<header><h1>🍽️ Restaurant Management</h1><p>Manage tables, customer orders and bills in one place.</p></header>
+<main>
+<section class="card">
+<h2>Place a Customer Order</h2>
+<form id="orderForm">
+<label class="field" for="customer">Customer name</label>
+<input id="customer" name="customer" placeholder="Enter customer name" required>
+<label class="field" for="tableId">Choose an available table</label>
+<select id="tableId" name="tableId" required></select>
+<h3>Menu</h3><div id="menu" class="menu-grid">Loading menu...</div>
+<button type="submit">Place Order & Generate Bill</button>
+<div id="notice" class="notice" role="status"></div>
+</form>
+</section>
+<section class="card">
+<h2>Table Availability</h2>
+<p class="muted">Available tables can be selected for a new order.</p>
+<div id="tables">Loading tables...</div>
+<button type="button" onclick="loadData()">Refresh Tables</button>
+</section>
+<section class="card full">
+<h2>Orders & Bills</h2>
+<p class="muted">Orders placed during this running session appear below.</p>
+<div id="orders">No orders yet.</div>
+</section>
+</main>
+<script>
+/* Connection helper (added): when the page is opened from the Java server (http://localhost:8080) this does nothing.
+   If the page is opened any other way (double-click on index.html, VS Code Live Server, another port), the
+   same API requests are sent to the Java server on http://localhost:8080 so tables and menu still load. */
+(function(){
+ if((location.protocol==='http:'||location.protocol==='https:')&&location.port==='8080')return;
+ var API='http://localhost:8080',nativeFetch=window.fetch.bind(window);
+ window.fetch=function(u,o){return nativeFetch(typeof u==='string'&&u.charAt(0)==='/'?API+u:u,o);};
+})();
+</script>
+<script>
+const money=n=>'₹'+Number(n).toFixed(2);
+async function loadData(){
+ const [menuRes,tableRes]=await Promise.all([fetch('/api/menu'),fetch('/api/tables')]);
+ const menu=await menuRes.json(), tables=await tableRes.json();
+ document.getElementById('menu').innerHTML=menu.map(m=>`<div class="menu-item"><label><input type="checkbox" name="items" value="${m.id}" style="width:auto"><span><strong>${m.name}</strong><br><small>${m.category}</small></span></label><div class="price">${money(m.price)}</div></div>`).join('');
+ const select=document.getElementById('tableId');
+ select.innerHTML='<option value="">-- Select table --</option>'+tables.filter(t=>t.status==='Available').map(t=>`<option value="${t.id}">Table ${t.id} · ${t.capacity} seats</option>`).join('');
+ document.getElementById('tables').innerHTML='<table><thead><tr><th>Table</th><th>Seats</th><th>Status</th></tr></thead><tbody>'+tables.map(t=>`<tr><td>${t.id}</td><td>${t.capacity}</td><td>${t.status}</td></tr>`).join('')+'</tbody></table>';
+ await loadOrders();
+}
+async function loadOrders(){
+ const res=await fetch('/api/orders'), orders=await res.json();
+ document.getElementById('orders').innerHTML=orders.length?'<table><thead><tr><th>Order #</th><th>Customer</th><th>Table</th><th>Items</th><th>Status</th><th>Bill</th></tr></thead><tbody>'+orders.map(o=>`<tr><td>${o.id}</td><td>${o.customer}</td><td>${o.tableId}</td><td>${o.items}</td><td>${o.status}</td><td><strong>${money(o.total)}</strong></td></tr>`).join('')+'</tbody></table>':'No orders yet.';
+}
+document.getElementById('orderForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const selected=[...document.querySelectorAll('input[name="items"]:checked')].map(x=>x.value);
+ const notice=document.getElementById('notice');
+ if(!selected.length){notice.className='notice error';notice.textContent='Please select at least one menu item.';notice.style.display='block';return;}
+ const data=new URLSearchParams({customer:document.getElementById('customer').value,tableId:document.getElementById('tableId').value,items:selected.join(',')});
+ try{
+  const res=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:data});
+  const result=await res.json();
+  if(!res.ok)throw new Error(result.error||'Could not place order.');
+  notice.className='notice success';notice.textContent=`${result.message} Order #${result.orderId}. Total bill: ${money(result.total)}.`;notice.style.display='block';
+  document.getElementById('customer').value='';
+  document.querySelectorAll('input[name="items"]').forEach(x=>x.checked=false);
+  await loadData();
+ }catch(err){notice.className='notice error';notice.textContent=err.message;notice.style.display='block';}
+});
+loadData();
+</script>
+</body>
+</html>
